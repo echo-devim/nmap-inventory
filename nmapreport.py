@@ -1,6 +1,6 @@
 # NMAP Report Converter to Excel
 # Example command:
-# sudo nmap -sV --script=http-title --system-dns -vv --script smb-os-discovery -O --scan-delay 100ms --max-scan-delay 300ms 10.20.30.0/24 20.30.40.0/24 -oX /tmp/scan.xml
+# sudo nmap -sV --script=http-title --system-dns -vv --script smb-os-discovery -O --osscan-limit --max-os-tries 2 --scan-delay 100ms --max-scan-delay 300ms 10.20.30.0/24 20.30.40.0/24 -oX /tmp/scan.xml
 
 import sys
 import xml.etree.ElementTree as ET
@@ -25,7 +25,7 @@ def parse_nmap_xml(xml_file):
         os = "n/a"
         hostname = "n/a"
         open_ports = []
-        extra = "n/a"
+        extra = ""
         
         if host.find('os'):
             os_info = host.find('os').find('osmatch')
@@ -42,7 +42,7 @@ def parse_nmap_xml(xml_file):
         if host.find('hostscript'):
             script = host.find('hostscript').find('script')
             if script is not None and script.get('id','') == "smb-os-discovery":
-                extra = script.get('output','n/a')
+                extra += script.get('output','') + "\r\n"
         
         for port in host.findall('.//port'):
             port_id = port.get('portid')
@@ -50,11 +50,16 @@ def parse_nmap_xml(xml_file):
             service_product = port.find('service').get('product', '')
             service_extrainfo = port.find('service').get('extrainfo', '')
             service_version = port.find('service').get('version', '')
-            title = port.find('script')
-            if title != None:
-                title = title.get('http-title', '')
-            else:
-                title = ""
+            title = ""
+            for s in port.findall('script'):
+                scriptname = s.get('id','')
+                if scriptname == "http-title":
+                    title = s.get('http-title', '')
+                elif scriptname == "default-creds":
+                    out = s.get('output','')
+                    if out != "":
+                        extra += out + "\r\n"
+
             details = f"{port_id}/{service_name}"
             if service_product != "":
                 details += " "+service_product
