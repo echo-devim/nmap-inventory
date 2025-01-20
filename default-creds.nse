@@ -375,14 +375,14 @@ action = function(host, port)
   local results = {}
   local hostos = nil
   if host.os ~= nil and (#host.os > 0) then
-    hostos = host.os[1]
+    hostos = host.os[1].name
   else
     stdnse.print_debug(1,"os detection failed, try default credentials for "..host.ip)
     hostos = "default"
   end
   for _, entry in ipairs(data) do
     local os = entry.os
-    if string.find(string.lower(hostos.name), os) then
+    if string.find(string.lower(hostos), os) then
       local user, pass = entry.creds:match("([^:]+):([^:]*)")
       if user and pass then
         stdnse.print_debug(1, "Testing host: %s, user: %s, pass: %s", host.ip, user, pass)
