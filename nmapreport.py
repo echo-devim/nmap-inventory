@@ -1,6 +1,6 @@
 # NMAP Report Converter to Excel
 # Example command:
-# sudo nmap -sV --script=http-title --system-dns -vv --script smb-os-discovery -O --osscan-limit --max-os-tries 2 --scan-delay 100ms --max-scan-delay 300ms 10.20.30.0/24 20.30.40.0/24 -oX /tmp/scan.xml
+# sudo nmap -sV --script=http-title --script=banner --script http-auth --script default-creds.nse --script-args default-creds.csv=./default_creds.csv --system-dns -vv --script smb-os-discovery -O --osscan-limit --max-os-tries 2 --scan-delay 100ms --max-scan-delay 300ms 10.20.30.0/24 20.30.40.0/24 -oX /tmp/scan.xml
 
 import sys
 import xml.etree.ElementTree as ET
@@ -50,15 +50,6 @@ def parse_nmap_xml(xml_file):
             service_product = port.find('service').get('product', '')
             service_extrainfo = port.find('service').get('extrainfo', '')
             service_version = port.find('service').get('version', '')
-            title = ""
-            for s in port.findall('script'):
-                scriptname = s.get('id','')
-                if scriptname == "http-title":
-                    title = s.get('http-title', '')
-                elif scriptname == "default-creds":
-                    out = s.get('output','')
-                    if out != "":
-                        extra += out + "\r\n"
 
             details = f"{port_id}/{service_name}"
             if service_product != "":
@@ -67,8 +58,16 @@ def parse_nmap_xml(xml_file):
                 details += " "+service_version
             if service_extrainfo != "":
                 details += " "+service_extrainfo
-            if title != "":
-                details += " "+title
+
+            for s in port.findall('script'):
+                scriptname = s.get('id','')
+                if scriptname == "http-title":
+                    details += " "+s.get('output', '')
+                else:
+                    out = s.get('output')
+                    if out != None:
+                        extra += f"{scriptname}:\r\n{out}\r\n"
+
             open_ports.append(details)
         
         subnet = address.rsplit('.', 1)[0] + '.0'
