@@ -15,7 +15,7 @@ description = [[
   The script reads the specified input CSV file passed as a script argument.
 ]]
 
-author = "Your Name"
+author = "echo-devim"
 license = "Same as Nmap--See https://nmap.org/book/man-legal.html"
 categories = {"auth", "intrusive"}
 
