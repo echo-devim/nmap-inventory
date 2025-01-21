@@ -1,6 +1,6 @@
-# NMAP Report Converter to Excel
+# NMAP Network Inventory
 
-Nmap is a great open-source tool to perform a network inventory.
+Nmap is a great open-source tool to perform a network inventory, it lacks only a user-friendly scan report.
 This repo contains a simple script to convert the xml report produced by nmap into the more readable format xlsx (Excel).
 I developed also a custom NSE script called `default-creds.nse` to test specific default credentials based on operating system type for the following protocols: ssh, smb, telnet and ftp. The goal is to perform a non-invasive test (just one or two attempts in order to not trigger alarms).
 
@@ -15,3 +15,5 @@ $ sudo nmap -sV --script=http-title --script=banner --system-dns -vv --script=sm
 ```sh
 $ python3 nmapreport.py /tmp/scan.xml out.xlsx
 ```
+
+you'll get a excel file with a summary, worksheet for each subnet, any info about hosts and services, discovered credentials, domains, etc.
